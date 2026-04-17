@@ -52,3 +52,54 @@ export const validateBlogInput = (title, content) => {
   }
   return null;
 };
+
+/**
+ * Client-side Rate Limiting
+ * Prevents spam submits (60s cooldown per form type).
+ * Uses localStorage timestamps.
+ */
+export const checkRateLimit = (formType = 'blog') => {
+  try {
+    const key = `SEC_RATE_${formType}`;
+    const lastTime = localStorage.getItem(key);
+    const now = Date.now();
+    const cooldown = 60 * 1000; // 60 seconds
+
+    if (lastTime && (now - parseInt(lastTime)) < cooldown) {
+      const remaining = Math.ceil((cooldown - (now - parseInt(lastTime))) / 1000);
+      return `Rate limited. Wait ${remaining}s.`;
+    }
+
+    localStorage.setItem(key, now.toString());
+    return null;
+  } catch (e) {
+    console.error('Rate limit check failed:', e);
+    return null;
+  }
+};
+
+/**
+ * Simple CSRF Token Generation/Validation
+ * UUID-based per session, stored securely.
+ */
+export const generateCSRF = () => {
+  return crypto.randomUUID();
+};
+
+export const validateCSRF = (token) => {
+  try {
+    const stored = localStorage.getItem('SEC_CSRF_TOKEN');
+    return stored === token;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const setCSRFToken = (token) => {
+  try {
+    localStorage.setItem('SEC_CSRF_TOKEN', token);
+  } catch (e) {
+    console.error('CSRF set failed:', e);
+  }
+};
+

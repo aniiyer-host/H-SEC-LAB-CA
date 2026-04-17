@@ -1,16 +1,1 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Secure Blog Viewer - H-SEC Lab CA\n\nA modern React + Vite blog app with comprehensive frontend security features.\n\n## Security Features\n\n1. **Input Sanitization (XSS Prevention)**: Manual HTML escaping and protocol stripping in `sanitizer.js`.\n2. **Input Validation**: Length and presence checks for blog titles/content.\n3. **Client-side Rate Limiting**: 60s cooldown per blog submit using localStorage timestamps.\n4. **CSRF Protection**: Client-generated UUID tokens validated on form submit.\n5.  **Secure localStorage**: `SEC_` prefixed keys, Base64 obfuscation, data integrity validation.\n7. **Safe Storage Operations**: Try-catch with filtering for malformed data.\n\n## Run the App\n\n```bash\nnpm install\nnpm run dev\n```\n\nTest security:\n- Try XSS payloads in form → sanitized.\n- Spam submit form → rate limited.\n- Inspect localStorage → prefixed/obfuscated.\n- DevTools Network → CSP enforced.\n

@@ -1,30 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, AlertCircle } from 'lucide-react';
-import { sanitizeInput, validateBlogInput } from '../utils/sanitizer';
+import { sanitizeInput, validateBlogInput, checkRateLimit, generateCSRF, validateCSRF, setCSRFToken } from '../utils/sanitizer';
 
 const BlogForm = ({ onAddPost }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [error, setError] = useState(null);
+  const [csrfToken, setCsrfTokenLocal] = useState('');
+
+  useEffect(() => {
+    let token = localStorage.getItem('SEC_CSRF_TOKEN');
+    if (!token) {
+      token = generateCSRF();
+      setCSRFToken(token);
+    }
+    setCsrfTokenLocal(token);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // 1. Validate Input
+    // 0. Rate Limit Check
+    const rateError = checkRateLimit('blog');
+    if (rateError) {
+      setError(rateError);
+      return;
+    }
+
+    // 1. CSRF Check
+    if (!validateCSRF(csrfToken)) {
+      setError('CSRF validation failed. Please refresh.');
+      return;
+    }
+    
+    // 2. Validate Input
     const validationError = validateBlogInput(title, content);
     if (validationError) {
       setError(validationError);
       return;
     }
 
-    // 2. Clear previous errors
+    // 3. Clear previous errors
     setError(null);
 
-    // 3. Sanitize Input (Pre-storage)
+    // 4. Sanitize Input (Pre-storage)
     const sanitizedTitle = sanitizeInput(title);
     const sanitizedContent = sanitizeInput(content);
 
-    // 4. Submit
+    // 5. Submit
     onAddPost({
       id: crypto.randomUUID(),
       title: sanitizedTitle,
@@ -32,7 +55,7 @@ const BlogForm = ({ onAddPost }) => {
       timestamp: Date.now(),
     });
 
-    // 5. Reset
+    // 6. Reset
     setTitle('');
     setContent('');
   };
@@ -84,3 +107,4 @@ const BlogForm = ({ onAddPost }) => {
 };
 
 export default BlogForm;
+
